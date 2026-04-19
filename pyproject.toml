@@ -1,0 +1,32 @@
+[project]
+name = "stt-pipeline"
+version = "0.1.0"
+description = "Diarized speech-to-text pipeline: Whisper (NPU) + pyannote speaker diarization (CPU)"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "httpx",
+    "python-multipart",
+    "soundfile",
+    "pyannote.audio",
+]
+
+[project.scripts]
+stt-pipeline = "stt_pipeline.app:main"
+
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu" }]
+torchaudio = [{ index = "pytorch-cpu" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/stt_pipeline"]
