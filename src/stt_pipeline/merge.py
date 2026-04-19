@@ -12,8 +12,11 @@ def _dominant_speaker(
     seg_start: float,
     seg_end: float,
     speaker_segments: list[tuple[float, float, str]],
-) -> str:
-    """Find the speaker with the largest overlap for a given time range."""
+) -> tuple[str, float]:
+    """Find the speaker with the largest overlap for a given time range.
+
+    Returns (speaker_label, overlap_seconds).
+    """
     best_speaker = "UNKNOWN"
     best_overlap = 0.0
     for sp_start, sp_end, label in speaker_segments:
@@ -23,7 +26,7 @@ def _dominant_speaker(
         if ov > best_overlap:
             best_overlap = ov
             best_speaker = label
-    return best_speaker
+    return best_speaker, best_overlap
 
 
 def merge_transcript(
@@ -45,7 +48,10 @@ def merge_transcript(
         start = float(seg.get("start", 0))
         end = float(seg.get("end", 0))
         text = seg.get("text", "").strip()
-        speaker = _dominant_speaker(start, end, speaker_segments)
+        speaker, overlap = _dominant_speaker(start, end, speaker_segments)
+
+        if overlap == 0.0:
+            continue
 
         labeled_text = f"[{speaker}]: {text}"
         text_parts.append(labeled_text)
