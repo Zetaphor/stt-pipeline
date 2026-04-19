@@ -12,7 +12,8 @@ Exposes an OpenAI-compatible `/v1/audio/transcriptions` endpoint that returns sp
    - Original audio is forwarded to a Whisper endpoint for timestamped transcription
    - WAV audio is processed by pyannote's `speaker-diarization-3.1` pipeline on CPU
 4. Whisper segments are merged with speaker labels by largest time overlap
-5. Response includes `[SPEAKER_XX]:` prefixed text and a `speaker` field on each segment
+5. Segments with no speech detected by pyannote are dropped (acts as implicit VAD)
+6. Response includes `[SPEAKER_XX]:` prefixed text and a `speaker` field on each segment
 
 ## Requirements
 
@@ -97,7 +98,7 @@ OpenAI-compatible multipart form upload.
 | `response_format` | string | `verbose_json` | `verbose_json` or `text` |
 | `language` | string | *(auto)* | ISO language code hint |
 
-The `verbose_json` response extends the standard Whisper format with a `speaker` field on each segment.
+The `verbose_json` response extends the standard Whisper format with a `speaker` field on each segment. Whisper segments that fall outside any pyannote speech region are automatically filtered out, suppressing transcription of non-speech events (music, background noise, beeps, etc.).
 
 ### `GET /health`
 
