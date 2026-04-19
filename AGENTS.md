@@ -19,6 +19,7 @@ This is a FastAPI service that combines Whisper speech-to-text (via an external 
 - **pyannote v4 API.** The pipeline uses `token=` (not `use_auth_token=`) for authentication and returns `DiarizeOutput` where the annotation is at `.speaker_diarization`.
 - **Non-WAV conversion.** MP3 and other compressed formats cause sample count mismatches in pyannote's torchaudio backend. All non-WAV uploads are converted to 16 kHz mono WAV via ffmpeg before diarization. The original file is sent to Whisper unchanged.
 - **Concurrent execution.** Whisper transcription (async HTTP) and diarization (threaded CPU) run in parallel via `asyncio.gather`.
+- **Non-speech filtering.** The merge step uses pyannote's speech regions as an implicit VAD. Any Whisper segment with zero overlap against pyannote's speaker timeline is dropped. This prevents non-speech audio events (music, tones, background noise) from appearing in the transcript.
 
 ## Development
 
